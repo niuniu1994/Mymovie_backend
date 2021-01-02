@@ -1,0 +1,72 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <context:property-placeholder location="classpath:database.properties"/>
+    <context:component-scan base-package="com.efrei.myMovies"/>
+    <aop:aspectj-autoproxy/>
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${database.driverClass}"/>
+        <property name="url" value="${database.url}"/>
+        <property name="username" value="${database.username}"/>
+        <property name="password" value="${database.password}"/>
+    </bean>
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!-- Define the package handling the entities -->
+        <property name="packagesToScan" value="com.efrei.myMovies.entity"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+        </property>
+        <!-- Configure Hibernates -->
+        <property name="jpaProperties">
+            <props>
+                <!--<prop key="hibernate.current_session_context_class">thread</prop>-->
+                <!-- Define the connection provider -->
+                <prop key="connection.provider_class">org.hibernate.c3p0.internal.C3P0ConnectionProvider</prop>
+                <!-- Define the sql dialect -->
+                <prop key="hibernate.dialect">
+                    org.hibernate.dialect.MySQL8Dialect
+                </prop>
+
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <!--<prop key="hibernate.hbm2ddl.auto">none</prop>-->
+                <!-- Show the sql request in the console -->
+                <prop key="hibernate.show_sql">true</prop>
+                <!-- Format the show of the sql request -->
+                <prop key="hibernate.format_sql">true</prop>
+                <!-- Show the hint of sql request in the console -->
+                <prop key="hibernate.use_sql_comments">true</prop>
+
+
+                <!-- c3p0  -->
+                <!-- Specifies how many connections it should try to acquire if the pool runs out of available connections -->
+                <prop key="c3p0.acquire_increment">20</prop>
+                <!-- Let the pool periodically check a connection for it's validity to avoid connection closed issue-->
+                <prop key="c3p0.idle_test_period">3</prop>
+                <!-- Specifies the maximum number of connections it can maintain at any given time -->
+                <prop key="c3p0.max_size">20</prop>
+                <!-- Specifies the minimum number of connections it should maintain at any given time -->
+                <prop key="c3p0.min_size">3</prop>
+                <!-- Number of prepared statements will be cached. Increase performance. -->
+                <prop key="c3p0.max_statements">10</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+</beans>
