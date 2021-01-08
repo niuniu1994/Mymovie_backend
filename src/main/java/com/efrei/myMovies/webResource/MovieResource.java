@@ -1,7 +1,9 @@
 package com.efrei.myMovies.webResource;
 
+import com.efrei.myMovies.constant.ErrorCode;
 import com.efrei.myMovies.dao.CinemaAdminDao;
 import com.efrei.myMovies.dao.MovieDao;
+import com.efrei.myMovies.dto.Response;
 import com.efrei.myMovies.entity.Movie;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,17 +26,22 @@ import java.util.Map;
 public class MovieResource {
 
     @Autowired
-    MovieDao movieDao;
+    private MovieDao movieDao;
 
     @Autowired
-    CinemaAdminDao cinemaAdminDao;
+    private CinemaAdminDao cinemaAdminDao;
+
+
 
     @Path("movies/{city}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String getMoviesByCity(@PathParam("city") String city) throws JsonProcessingException {
+    public Response getMoviesByCity(@PathParam("city") String city) throws JsonProcessingException {
+        Response response = new Response();
         if (city == null) {
-            return "{\"msg\":\"city name null\"}";
+            response.setErrorCode(ErrorCode.NULLOBJECT.getErrorCode());
+            response.setErrorMsg(ErrorCode.NULLOBJECT.getErrorMsg());
+            return response;
         }
         city = city.replace("_", " ").trim();
         List<Movie> movieList = movieDao.findMoviesByCity(city);
@@ -42,8 +49,9 @@ public class MovieResource {
         Map<String, Object> moviesMap = new HashMap<>();
         moviesMap.put("movies", movieList);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(moviesMap);
+        response.setData(moviesMap);
+        response.setErrorMsg(ErrorCode.SUCCESS.getErrorMsg());
+        return response;
     }
 
 }

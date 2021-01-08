@@ -32,7 +32,7 @@ public class MovieDaoImpl implements MovieDao {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED,rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED,rollbackFor = RuntimeException.class)
     public int addMovie(Movie movie) {
         entityManager.persist(movie);
         return movie.getMovieId();
